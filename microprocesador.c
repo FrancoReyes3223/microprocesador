@@ -21,12 +21,9 @@ typedef struct {
     uint32_t pc;
     uint32_t psw;
     uint32_t regs[NUM_REGS];
-} CPU;
-
-typedef struct {
     uint32_t data_memory[MEM_SIZE];
     uint32_t program_memory[MEM_SIZE];
-} Memory;
+} CPU;
 
 /*
  * Tipo R: [ opcode 4 ][ ø 4 ][ $rd 4 ][ $rs 4 ][ $rt 4 ][ funct 12 ]
@@ -50,36 +47,42 @@ void add(CPU *cpu, uint32_t inst)
     cpu->regs[rd] = cpu->regs[rs] + cpu->regs[rt];
 }
 
-void lw(CPU *cpu, Memory *mem, uint32_t inst)
+void lw(CPU *cpu, uint32_t inst)
 {
     int rd  = GET_I_RD(inst);
     int rs  = GET_I_RS(inst);
     int imm = GET_I_IMM(inst);
     uint32_t addr = (cpu->regs[rs] + imm) % MEM_SIZE;
-    cpu->regs[rd] = mem->data_memory[addr];
+    cpu->regs[rd] = cpu->data_memory[addr];
 }
 
-void sw(CPU *cpu, Memory *mem, uint32_t inst)
+void sw(CPU *cpu, uint32_t inst)
 {
-
+    int rd  = GET_I_RD(inst);
+    int rs  = GET_I_RS(inst);
+    int imm = GET_I_IMM(inst);
+    uint32_t addr = (cpu->regs[rs] + imm) % MEM_SIZE;
+    cpu->data_memory[addr] = cpu->regs[rd];
 }
 
 void beq(CPU *cpu, uint32_t inst)
 {
-    /* completar */
+    int rd  = GET_I_RD(inst);
+    int rs  = GET_I_RS(inst);
+    int imm = GET_I_IMM(inst);
+    if (cpu->regs[rd] == cpu->regs[rs])
+        cpu->pc += imm;
 }
 
 void j(CPU *cpu, uint32_t inst)
 {
-    /* completar */
+    cpu->pc = GET_JADDR(inst);
 }
 
 int main(void)
 {
     CPU    cpu;
-    Memory mem;
     memset(&cpu, 0, sizeof(cpu));
-    memset(&mem, 0, sizeof(mem));
 
     cpu.regs[REG_T0] = 10;
     cpu.regs[REG_T3] = 20;
